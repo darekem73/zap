@@ -6,13 +6,14 @@ let debris = [];
 let GROUND = 0.8;
 let t0;
 let score = 0;
-let speedReduction = 0.96; //lepkosc powietrza
+let speedReduction = 0.92; //mniej - mniejsza predkosc spadania
 let deltaT = 1000;
 let tanks = [];
 let currentT = 0;
-let speedUP = 0.95; //wiecej - mniejszy speedup
+let speedUP = 0.96; //wiecej - mniejszy speedup (czas miedzy dodaniami liter)
 let letterBoxes;
-let numDebris = 10;
+let numDebris = 0;
+let countDown = 3;
 
 // ============================= Shot
 class Shot {
@@ -45,14 +46,14 @@ class Shot {
   draw() {
     fill(255);
     noStroke();
-    //ellipse(this.pos.x, this.pos.y, this.size);
-    push();
-    translate(this.pos.x, this.pos.y);
-    rotate(this.vel.heading() + PI / 2);
-    triangle(-this.size / 2, this.size / 2,
-      0, -this.size,
-      this.size / 2, this.size / 2);
-    pop();
+    ellipse(this.pos.x, this.pos.y, this.size);
+    //     push();
+    //     translate(this.pos.x,this.pos.y);
+    //     rotate(this.vel.heading() + PI/2);
+    //     triangle(- this.size/2, this.size/2,
+    //             0, - this.size,
+    //             this.size/2, this.size/2);
+    //     pop();
   }
 }
 
@@ -149,7 +150,7 @@ class Debris {
     this.pos = createVector(x, y);
     this.pos.y = constrain(this.pos.y, 0, GROUND * height);
     this.vel = createVector(random(-3, 3), random(-10, 0));
-    this.gravity = createVector(0, 0.2);
+    this.gravity = createVector(0, 0.22);
     this.angle = 0;
     this.omega = random(-1, 1);
     this.color = c;
@@ -162,7 +163,7 @@ class Debris {
   }
   bounce() {
     if (this.pos.y > GROUND * height) {
-      this.vel.y *= -0.70;
+      this.vel.y *= -0.60;
       this.pos.y = constrain(this.pos.y, 0, GROUND * height);
       this.bounces--;
     }
@@ -181,7 +182,7 @@ class Debris {
       push();
       translate(this.pos.x, this.pos.y);
       rotate(this.angle);
-      fill(this.color, 100, 100, 100);
+      fill(this.color, 100, 100);
       textSize(12);
       text(this.letter, 0, 0);
       pop();
@@ -361,6 +362,9 @@ function draw() {
   tanks.forEach(t => t.draw());
   tanks = tanks.filter(t => t.alive());
   if (tanks.length === 0) {
+    fill('red');
+    textSize(48);
+    text('GAME OVER\n' + score + ':' + frameCount, width / 2, height / 2);
     noLoop();
   }
 
@@ -384,13 +388,16 @@ function draw() {
   text(score, 150, 10);
   text(frameCount, 200, 10);
 
-  if (frameCount % 600 === 0) {
+  if (frameCount % 1200 === 0) {
     deltaT *= speedUP;
   }
   //   if (frameCount % 1000 === 0) {
   //     speedReduction *= 1.001;
   //   }
-
+  if (keyIsPressed) {
+    let letter = key;
+    letterBoxes = displayKeyboard(letter);
+  }
   if (mouseIsPressed) {
     let letter = letterBoxes.reduce((a, e) => {
       if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
@@ -404,4 +411,8 @@ function draw() {
     letterBoxes = displayKeyboard();
   }
   numDebris = map(frameRate(), 10, 60, 1, 7);
+  if (frameRate() < 10) {
+    debris = [];
+    letters = letters.filter(l => l.pos.y > 0);
+  }
 }
