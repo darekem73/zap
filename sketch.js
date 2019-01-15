@@ -284,7 +284,7 @@ function displayKeyboard(letter) {
       rect(x, y, letterW, letterH);
       noStroke();
       fill('black');
-      textSize(min(letterW / 2, 48));
+      textSize(max(letterW / 2, 48));
       text(letters[i][j], x + letterW / 2, y + letterH / 1.3);
       let b = {
         tl: {
