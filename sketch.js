@@ -284,7 +284,7 @@ function displayKeyboard(letter) {
       rect(x, y, letterW, letterH);
       noStroke();
       fill('black');
-      textSize(min(letterW / 2, 42));
+      textSize(min(letterW / 2.5, 42));
       text(letters[i][j], x + letterW / 2, y + letterH / 1.3);
       let b = {
         tl: {
@@ -338,7 +338,7 @@ function keyPressed() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth - 20, windowHeight - 20);
   //createCanvas(800,800);
   textAlign(CENTER);
   textFont('Arial');
