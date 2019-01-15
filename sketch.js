@@ -321,7 +321,7 @@ function checkLetter(letter) {
   if (!found) score--;
 }
 
-function mouseReleased() {
+function mouseReleased(event) {
   let letter = letterBoxes.reduce((a, e) => {
     if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
       return e.letter;
@@ -332,9 +332,9 @@ function mouseReleased() {
   checkLetter(letter.toUpperCase());
 }
 
-function keyPressed() {
+function keyPressed(event) {
   let letter = char(event.keyCode);
-  checkLetter(letter);
+  checkLetter(letter.toUpperCase());
 }
 
 function setup() {
