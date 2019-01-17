@@ -314,7 +314,7 @@ function randomLetter() {
 }
 
 function checkLetter(letter) {
-  if (!letter) return;
+  //if (!letter) return;
   let found = false;
   letters.forEach(l => {
     if (l.letter == letter && l.alive && l.pos.y > 0) {
@@ -383,7 +383,7 @@ function setup() {
 function draw() {
   if (gameOver) return;
   if (ecoMode) {
-    background(10);
+    background(255);
   } else {
     background(0);
   }
