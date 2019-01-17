@@ -431,12 +431,12 @@ function draw() {
   text(score, 150, 10);
   text(frameCount, 200, 10);
   if (gameOver) {
-    text('SPACE\nor here\nfor RESTART', 10, 25);
+    text('Press SPACE\nor here\nfor RESTART', 10, 30);
   } else {
     if (ecoMode) {
-      text('SPACE\nor here\nfor ECO', 10, 25);
+      text('Press SPACE\nor here\nfor NORMAL', 10, 30);
     } else {
-      text('SPACE\nor here\nfor NORMAL', 10, 25);
+      text('Press SPACE\nor here\nfor ECO MODE', 10, 30);
     }
   }
 
