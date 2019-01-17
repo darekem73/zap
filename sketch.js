@@ -13,7 +13,11 @@ let currentT = 0;
 let speedUP = 0.96; //wiecej - mniejszy speedup (czas miedzy dodaniami liter)
 let letterBoxes;
 let numDebris = 0;
+let numBounces = 3;
 let countDown = 3;
+let ecoMode = false;
+let gameOver = false;
+let tInit;
 
 // ============================= Shot
 class Shot {
@@ -155,7 +159,7 @@ class Debris {
     this.omega = random(-1, 1);
     this.color = c;
     this.letter = l;
-    this.bounces = 3;
+    this.bounces = numBounces;
     //this.life = 100;
   }
   alive() {
@@ -285,6 +289,7 @@ function displayKeyboard(letter) {
       noStroke();
       fill('black');
       textSize(min(letterW / 2.5, 42));
+      textAlign(CENTER);
       text(letters[i][j], x + letterW / 2, y + letterH / 1.3);
       let b = {
         tl: {
@@ -304,6 +309,7 @@ function displayKeyboard(letter) {
 }
 
 function randomLetter() {
+  return 'A';
   return char(65 + floor(random(26)));
 }
 
@@ -312,49 +318,78 @@ function checkLetter(letter) {
   let found = false;
   letters.forEach(l => {
     if (l.letter == letter && l.alive && l.pos.y > 0) {
-      if (currentT > tanks.length - 1) currentT = 0;
-      tanks[currentT].shoot(l);
-      currentT = (currentT + 1) % tanks.length;
+      if (ecoMode) {
+        l.kill();
+      } else {
+        if (currentT > tanks.length - 1) currentT = 0;
+        tanks[currentT].shoot(l);
+        currentT = (currentT + 1) % tanks.length;
+      }
       found = true;
     }
   });
-  if (!found) score--;
+  if (!found) score -= 10;
 }
 
 function mouseReleased(event) {
-  let letter = letterBoxes.reduce((a, e) => {
-    if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
-      return e.letter;
-    } else {
-      return a;
+  if (mouseX < 50 && mouseY < 50) {
+    ecoMode = !ecoMode;
+  } else {
+    let letter = letterBoxes.reduce((a, e) => {
+      if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
+        return e.letter;
+      } else {
+        return a;
+      }
+    }, undefined);
+    if (letter) {
+      checkLetter(letter.toUpperCase());
     }
-  }, undefined);
-  checkLetter(letter.toUpperCase());
+  }
 }
 
 function keyPressed(event) {
-  let letter = char(event.keyCode);
-  checkLetter(letter.toUpperCase());
+  if (event.keyCode == 32) {
+    if (gameOver) {
+      gameOver = false;
+      init();
+    } else {
+      ecoMode = !ecoMode;
+    }
+  } else {
+    let letter = char(event.keyCode);
+    checkLetter(letter.toUpperCase());
+  }
+}
+
+function init() {
+  tanks = Array(2).fill().map(t => new Tank(0.1 * width + random(0.8 * width), GROUND * height, random(-3 * PI / 4, -PI / 4)));
+  letters = Array(3).fill().map(l => new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
+  t0 = millis();
+  tInit = t0;
+  letterBoxes = displayKeyboard();
 }
 
 function setup() {
   createCanvas(windowWidth - 20, windowHeight - 20);
   //createCanvas(800,800);
-  textAlign(CENTER);
+  //textAlign(CENTER);
   textFont('Arial');
   textStyle(BOLD);
   colorMode(HSB);
-  tanks = Array(2).fill().map(t => new Tank(0.1 * width + random(0.8 * width), GROUND * height, random(-3 * PI / 4, -PI / 4)));
-  letters = Array(3).fill().map(l => new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
-  t0 = millis();
-  letterBoxes = displayKeyboard();
+  init();
 }
 
 function draw() {
-  background(0);
+  if (gameOver) return;
+  if (ecoMode) {
+    background(10);
+  } else {
+    background(0);
+  }
   let t1 = millis();
   if (t1 - t0 > deltaT) {
-    letters.push(new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
+    letters.push(new Letter(0.1 * width + random(0.8 * width), -random(0.1 * height), randomLetter()));
     t0 = millis();
   }
 
@@ -364,8 +399,10 @@ function draw() {
   if (tanks.length === 0) {
     fill('red');
     textSize(48);
-    text('GAME OVER\n' + score + ':' + frameCount, width / 2, height / 2);
-    noLoop();
+    let gameTime = (millis() - tInit) / 1000;
+    textAlign(CENTER);
+    text('GAME OVER\n' + score + 'p : ' + gameTime.toFixed(0) + 's', width / 2, height / 2);
+    gameOver = true;
   }
 
   letters.forEach(l => l.update());
@@ -379,6 +416,7 @@ function draw() {
 
   fill('sienna');
   rectMode(CORNER);
+  textAlign(LEFT);
   rect(0, GROUND * height, width, (1 - GROUND) * height);
   fill('white');
   textSize(12);
@@ -387,6 +425,7 @@ function draw() {
   text(frameRate().toFixed(0), 100, 10);
   text(score, 150, 10);
   text(frameCount, 200, 10);
+  text('SPACE\nor here\nfor ECO', 10, 25);
 
   if (frameCount % 1200 === 0) {
     deltaT *= speedUP;
@@ -410,7 +449,13 @@ function draw() {
   } else {
     letterBoxes = displayKeyboard();
   }
-  numDebris = map(frameRate(), 10, 60, 1, 7);
+  if (ecoMode) {
+    numDebris = 3;
+    numBounces = 1;
+  } else {
+    numDebris = floor(map(frameRate(), 10, 60, 1, 8));
+    numBounces = 3;
+  }
   if (frameRate() < 10) {
     debris = [];
     letters = letters.filter(l => l.pos.y > 0);
