@@ -331,8 +331,8 @@ function checkLetter(letter) {
   if (!found) score -= 10;
 }
 
-function mouseReleased(event) {
-  if (mouseX < 100 && mouseY < 100) {
+function mouseClicked(event) {
+  if (mouseX < 0.25 * width && mouseY < 0.25 * height) {
     if (gameOver) {
       gameOver = false;
       init();
@@ -388,7 +388,7 @@ function setup() {
 function draw() {
   if (gameOver) return;
   if (ecoMode) {
-    background(255);
+    background(51);
   } else {
     background(0);
   }
@@ -430,7 +430,16 @@ function draw() {
   text(frameRate().toFixed(0), 100, 10);
   text(score, 150, 10);
   text(frameCount, 200, 10);
-  text('SPACE\nor here\nfor ECO', 10, 25);
+  if (gameOver) {
+    text('SPACE\nor here\nfor RESTART', 10, 25);
+  } else {
+    if (ecoMode) {
+      text('SPACE\nor here\nfor ECO', 10, 25);
+    } else {
+      text('SPACE\nor here\nfor NORMAL', 10, 25);
+    }
+  }
+
 
   if (frameCount % 1200 === 0) {
     deltaT *= speedUP;
