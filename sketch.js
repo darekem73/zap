@@ -3,11 +3,11 @@
 
 let letters = [];
 let debris = [];
-let GROUND = 0.8;
+let GROUND = 0.75;
 let t0;
 let score = 0;
 let speedReduction = 0.92; //mniej - mniejsza predkosc spadania
-let deltaT = 1000;
+let deltaT = 2000;
 let tanks = [];
 let currentT = 0;
 let speedUP = 0.96; //wiecej - mniejszy speedup (czas miedzy dodaniami liter)
@@ -17,6 +17,7 @@ let numBounces = 3;
 let countDown = 3;
 let ecoMode = false;
 let gameOver = false;
+let hiddenMode = false;
 let tInit;
 
 // ============================= Shot
@@ -50,14 +51,17 @@ class Shot {
   draw() {
     fill(255);
     noStroke();
-    ellipse(this.pos.x, this.pos.y, this.size);
-    //     push();
-    //     translate(this.pos.x,this.pos.y);
-    //     rotate(this.vel.heading() + PI/2);
-    //     triangle(- this.size/2, this.size/2,
-    //             0, - this.size,
-    //             this.size/2, this.size/2);
-    //     pop();
+    if (hiddenMode) {
+      push();
+      translate(this.pos.x, this.pos.y);
+      rotate(this.vel.heading() + PI / 2);
+      triangle(-this.size / 2, this.size / 2,
+        0, -this.size,
+        this.size / 2, this.size / 2);
+      pop();
+    } else {
+      ellipse(this.pos.x, this.pos.y, this.size);
+    }
   }
 }
 
@@ -339,6 +343,8 @@ function mouseClicked(event) {
     } else {
       ecoMode = !ecoMode;
     }
+  } else if (mouseX > 0.75 * width && mouseY < 0.25 * height) {
+    hiddenMode = !hiddenMode;
   } else {
     let letter = letterBoxes.reduce((a, e) => {
       if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
@@ -387,11 +393,7 @@ function setup() {
 
 function draw() {
   if (gameOver) return;
-  if (ecoMode) {
-    background(51);
-  } else {
-    background(0);
-  }
+  background(0);
   let t1 = millis();
   if (t1 - t0 > deltaT) {
     letters.push(new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
@@ -440,7 +442,6 @@ function draw() {
     }
   }
 
-
   if (frameCount % 1200 === 0) {
     deltaT *= speedUP;
   }
@@ -470,7 +471,7 @@ function draw() {
     numDebris = floor(map(frameRate(), 10, 60, 1, 8));
     numBounces = 3;
   }
-  if (frameRate() < 10) {
+  if (frameRate() < 10 && frameCount > 10) {
     debris = [];
     letters = letters.filter(l => l.pos.y > 0);
   }
