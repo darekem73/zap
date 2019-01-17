@@ -389,7 +389,7 @@ function draw() {
   }
   let t1 = millis();
   if (t1 - t0 > deltaT) {
-    letters.push(new Letter(0.1 * width + random(0.8 * width), -random(0.1 * height), randomLetter()));
+    letters.push(new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
     t0 = millis();
   }
 
