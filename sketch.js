@@ -332,8 +332,13 @@ function checkLetter(letter) {
 }
 
 function mouseReleased(event) {
-  if (mouseX < 50 && mouseY < 50) {
-    ecoMode = !ecoMode;
+  if (mouseX < 100 && mouseY < 100) {
+    if (gameOver) {
+      gameOver = false;
+      init();
+    } else {
+      ecoMode = !ecoMode;
+    }
   } else {
     let letter = letterBoxes.reduce((a, e) => {
       if (!(mouseX < e.tl.x || mouseX > e.br.x || mouseY < e.tl.y || mouseY > e.br.y)) {
