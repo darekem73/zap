@@ -309,7 +309,7 @@ function displayKeyboard(letter) {
 }
 
 function randomLetter() {
-  return 'A';
+  //return 'A';
   return char(65 + floor(random(26)));
 }
 
