@@ -1,6 +1,6 @@
 // letter zapper 3.0 current
 // jshint esnext: true
-
+let version = "3.0"
 let letters = [];
 let debris = [];
 let GROUND = 0.75;
@@ -32,11 +32,28 @@ class Shot {
     this.target = t;
     this.lives = true;
     this.size = 4;
+    this.blastSize = 10;
   }
   alive() {
     return this.lives;
   }
   update() {
+    if (this.pos.y > ground[floor(this.pos.x)]) {
+      let x_left = floor(this.pos.x - this.blastSize);
+      let x_right = floor(this.pos.x + this.blastSize);
+      for (let x = x_left; x <= x_right; x++) {
+        let sin_angle = (x - this.pos.x) / this.blastSize;
+        let y1 = this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+        let y2 = -this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+        if (y2 > ground[x]) ground[x] = y2;
+        if (y1 > ground[x]) ground[x] = y1;
+        if (ground[x] > GROUND * height) {
+          ground[x] = GROUND * height;
+        }
+      }
+      this.lives = false;
+      return;
+    }
     let d = p5.Vector.sub(this.target.pos, this.pos);
     if (d.mag() < this.target.size) {
       this.target.kill();
@@ -212,8 +229,21 @@ class Letter {
     this.lives = true;
     this.score = 0;
     this.size = 32;
+    this.blastSize = 32;
   }
   boom() {
+    let x_left = floor(this.pos.x - this.blastSize);
+    let x_right = floor(this.pos.x + this.blastSize);
+    for (let x = x_left; x <= x_right; x++) {
+      let sin_angle = (x - this.pos.x) / this.blastSize;
+      let y1 = this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+      let y2 = -this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+      if (y2 > ground[x]) ground[x] = y2;
+      if (y1 > ground[x]) ground[x] = y1;
+      if (ground[x] > GROUND * height) {
+        ground[x] = GROUND * height;
+      }
+    }
     for (let i = 0; i < numDebris; i++) {
       debris.push(new Debris(this.pos.x, this.pos.y, this.letter, this.color));
     }
@@ -238,7 +268,7 @@ class Letter {
           let d = p5.Vector.sub(t.pos, this.pos);
           if (d.mag() < this.size + t.size) {
             t.kill();
-          } else if (d.mag() < 2 * (this.size + t.size)) {
+          } else if (d.mag() < 2 * this.size + t.size) {
             d.setMag(8);
             d.y = -10;
             t.move(d);
@@ -413,21 +443,13 @@ function draw() {
   background(0);
   let t1 = millis();
   if (t1 - t0 > deltaT) {
-    letters.push(new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
+    letters.push(new Letter(0.05 * width + random(0.9 * width), -random(height), randomLetter()));
     t0 = millis();
   }
 
   tanks.forEach(t => t.update());
   tanks.forEach(t => t.draw());
   tanks = tanks.filter(t => t.alive());
-  if (tanks.length === 0) {
-    fill('red');
-    textSize(48);
-    let gameTime = (millis() - tInit) / 1000;
-    textAlign(CENTER);
-    text('GAME OVER\n' + score + 'p : ' + gameTime.toFixed(0) + 's', width / 2, height / 2);
-    gameOver = true;
-  }
 
   letters.forEach(l => l.update());
   letters.forEach(l => l.draw());
@@ -446,6 +468,15 @@ function draw() {
   stroke('sienna');
   ground.forEach((g, x) => line(x, height, x, g));
 
+  if (tanks.length === 0) {
+    fill('red');
+    textSize(48);
+    let gameTime = (millis() - tInit) / 1000;
+    textAlign(CENTER);
+    text('GAME OVER\n' + score + 'p : ' + gameTime.toFixed(0) + 's', width / 2, height / 2);
+    gameOver = true;
+  }
+
   fill('white');
   noStroke();
   textSize(12);
@@ -456,6 +487,7 @@ function draw() {
   //text(frameCount, 200, 10);
   let gameTime = (millis() - tInit) / 1000;
   text(gameTime.toFixed(0), 200, 10);
+  text(version, 0.95 * width, 10);
   if (gameOver) {
     text('Press SPACE\nor here\nfor RESTART', 10, 30);
   } else {
