@@ -1,4 +1,4 @@
-// letter zapper 2.0
+// letter zapper 3.0 current
 // jshint esnext: true
 
 let letters = [];
@@ -19,6 +19,9 @@ let ecoMode = false;
 let gameOver = false;
 let hiddenMode = false;
 let tInit;
+
+let ground = [];
+let xstart = 0;
 
 // ============================= Shot
 class Shot {
@@ -111,8 +114,8 @@ class Tank {
     this.vel.add(this.acc);
     this.acc.mult(0);
     this.pos.add(this.vel);
-    this.pos.y = constrain(this.pos.y, 0, GROUND * height);
-    if (this.pos.y == GROUND * height) this.vel.mult(0.8);
+    this.pos.y = constrain(this.pos.y, 0, ground[floor(this.pos.x)]);
+    if (this.pos.y == ground[floor(this.pos.x)]) this.vel.mult(0.8);
     if (this.pos.x < 0 || this.pos.x > width) {
       this.lives = false;
     }
@@ -156,7 +159,7 @@ class Tank {
 class Debris {
   constructor(x, y, l, c) {
     this.pos = createVector(x, y);
-    this.pos.y = constrain(this.pos.y, 0, GROUND * height);
+    this.pos.y = constrain(this.pos.y, 0, ground[floor(this.pos.x)]);
     this.vel = createVector(random(-3, 3), random(-10, 0));
     this.gravity = createVector(0, 0.22);
     this.angle = 0;
@@ -170,9 +173,9 @@ class Debris {
     return this.bounces > 0;
   }
   bounce() {
-    if (this.pos.y > GROUND * height) {
+    if (this.pos.y > ground[floor(this.pos.x)]) {
       this.vel.y *= -0.60;
-      this.pos.y = constrain(this.pos.y, 0, GROUND * height);
+      this.pos.y = constrain(this.pos.y, 0, ground[floor(this.pos.x)]);
       this.bounces--;
     }
   }
@@ -230,7 +233,7 @@ class Letter {
       this.vel.add(this.gravity);
       this.vel.mult(speedReduction);
       this.pos.add(this.vel);
-      if (this.pos.y > GROUND * height) {
+      if (this.pos.y > ground[floor(this.pos.x)]) {
         tanks.forEach(t => {
           let d = p5.Vector.sub(t.pos, this.pos);
           if (d.mag() < this.size + t.size) {
@@ -373,6 +376,16 @@ function keyPressed(event) {
   }
 }
 
+function generateGround() {
+  xOff = xstart;
+  for (let x = 0; x < width; x++) {
+    let yOff = noise(xOff);
+    yOff = map(yOff, 0, 1, 0, 0.3 * height);
+    xOff += 5e-3;
+    ground[x] = GROUND * height - yOff;
+  }
+}
+
 function init() {
   tanks = Array(2).fill().map(t => new Tank(0.1 * width + random(0.8 * width), GROUND * height, random(-3 * PI / 4, -PI / 4)));
   letters = Array(3).fill().map(l => new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
@@ -391,6 +404,7 @@ function setup() {
   textFont('Arial');
   textStyle(BOLD);
   colorMode(HSB);
+  generateGround();
   init();
 }
 
@@ -428,7 +442,12 @@ function draw() {
   rectMode(CORNER);
   textAlign(LEFT);
   rect(0, GROUND * height, width, (1 - GROUND) * height);
+  noFill();
+  stroke('sienna');
+  ground.forEach((g, x) => line(x, height, x, g));
+
   fill('white');
+  noStroke();
   textSize(12);
   //text(debris.length, 10, 10);
   text(letters.length, 50, 10);
