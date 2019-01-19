@@ -379,6 +379,7 @@ function init() {
   t0 = millis();
   tInit = t0;
   score = 0;
+  deltaT = 2000;
   letterBoxes = displayKeyboard();
 }
 
@@ -428,11 +429,11 @@ function draw() {
   rect(0, GROUND * height, width, (1 - GROUND) * height);
   fill('white');
   textSize(12);
-  text(debris.length, 10, 10);
+  //text(debris.length, 10, 10);
   text(letters.length, 50, 10);
-  text(frameRate().toFixed(0), 100, 10);
+  //text(frameRate().toFixed(0), 100, 10);
   text(score, 150, 10);
-  text(frameCount, 200, 10);
+  //text(frameCount, 200, 10);
   if (gameOver) {
     text('Press SPACE\nor here\nfor RESTART', 10, 30);
   } else {
