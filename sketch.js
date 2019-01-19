@@ -38,7 +38,7 @@ class Shot {
     return this.lives;
   }
   update() {
-    if (this.pos.y > ground[floor(this.pos.x)]) {
+    if (this.pos.y > ground[floor(this.pos.x)] && !ecoMode) {
       let x_left = floor(this.pos.x - this.blastSize);
       let x_right = floor(this.pos.x + this.blastSize);
       for (let x = x_left; x <= x_right; x++) {
@@ -232,16 +232,18 @@ class Letter {
     this.blastSize = 32;
   }
   boom() {
-    let x_left = floor(this.pos.x - this.blastSize);
-    let x_right = floor(this.pos.x + this.blastSize);
-    for (let x = x_left; x <= x_right; x++) {
-      let sin_angle = (x - this.pos.x) / this.blastSize;
-      let y1 = this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
-      let y2 = -this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
-      if (y2 > ground[x]) ground[x] = y2;
-      if (y1 > ground[x]) ground[x] = y1;
-      if (ground[x] > GROUND * height) {
-        ground[x] = GROUND * height;
+    if (!ecoMode) {
+      let x_left = floor(this.pos.x - this.blastSize);
+      let x_right = floor(this.pos.x + this.blastSize);
+      for (let x = x_left; x <= x_right; x++) {
+        let sin_angle = (x - this.pos.x) / this.blastSize;
+        let y1 = this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+        let y2 = -this.blastSize * sqrt(1 - sin_angle * sin_angle) + this.pos.y;
+        if (y2 > ground[x]) ground[x] = y2;
+        if (y1 > ground[x]) ground[x] = y1;
+        if (ground[x] > GROUND * height) {
+          ground[x] = GROUND * height;
+        }
       }
     }
     for (let i = 0; i < numDebris; i++) {
@@ -482,7 +484,7 @@ function draw() {
   textSize(12);
   //text(debris.length, 10, 10);
   text(letters.length, 50, 10);
-  //text(frameRate().toFixed(0), 100, 10);
+  text(frameRate().toFixed(0), 100, 10);
   text(score, 150, 10);
   //text(frameCount, 200, 10);
   let gameTime = (millis() - tInit) / 1000;
