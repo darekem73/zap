@@ -378,6 +378,7 @@ function init() {
   letters = Array(3).fill().map(l => new Letter(0.1 * width + random(0.8 * width), -random(height), randomLetter()));
   t0 = millis();
   tInit = t0;
+  score = 0;
   letterBoxes = displayKeyboard();
 }
 
