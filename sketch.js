@@ -434,6 +434,8 @@ function draw() {
   //text(frameRate().toFixed(0), 100, 10);
   text(score, 150, 10);
   //text(frameCount, 200, 10);
+  let gameTime = (millis() - tInit) / 1000;
+  text(gameTime.toFixed(0), 200, 10);
   if (gameOver) {
     text('Press SPACE\nor here\nfor RESTART', 10, 30);
   } else {
