@@ -380,6 +380,7 @@ function init() {
   tInit = t0;
   score = 0;
   deltaT = 2000;
+  ecoMode = false;
   letterBoxes = displayKeyboard();
 }
 
